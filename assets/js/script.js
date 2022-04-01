@@ -10,31 +10,65 @@ var currentUvIndex = document.querySelector('#uvIndexResult');
 var currentIconEl = document.querySelector('#currentIcon');
 var currentWeatherCard = document.querySelector('#currentWeather');
 
+function renderSearchHist(){
+  var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+  console.log(searchHistory);
+  if (searchHistory == null){
+    return
+  }else{
+    for (let i=0; i<searchHistory.length; i++){
+
+    let searchButton = document.createElement("button");
+    searchButton.classList = 'btn';
+
+    let toUpperCase = searchHistory[i].city.toUpperCase();
+    searchButton.setAttribute('data-id', toUpperCase);
+    searchButton.textContent = toUpperCase;
+    searchHistoryButtonsEl.appendChild(searchButton);
+
+    }
+  }
+}
+
+
 var formSubmitHandler = function (event) {
   event.preventDefault();
 
   var cityToSearch = nameInputEl.value.trim();
 
-  if (cityToSearch) {
-    getCityCord(cityToSearch);
+    if (cityToSearch) {
+      getCityCord(cityToSearch);
 
-    fiveDayWeatherEl.textContent = '';
-    nameInputEl.value = '';
-  } else {
-    alert('Please enter a U.S. city');
-  }
+      fiveDayWeatherEl.textContent = '';
+      nameInputEl.value = '';
+    } else {
+      alert('Please enter a U.S. city');
+    }
+  //setting to local storage
+  var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+
+  let searchedCity = {
+    city: cityToSearch,
+  };
+  
+  searchHistory.push(searchedCity);
+
+  localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
+
+  console.log(searchHistory);
+
 };
 
 var buttonClickHandler = function (event) {
-  var cityHistory = event.target.getAttribute('data-cityHistory');
+  var cityHistory = event.target.getAttribute('data-id');
   console.log(cityHistory)
 
   if (cityHistory) {
     // get lat and long from history
-    // getCityWeather(cityHistory);
+    fiveDayWeatherEl.textContent = '';
     getCityCord(cityHistory)
 
-    // fiveDayWeatherEl.textContent = '';
+    
   }
 };
 
@@ -108,8 +142,7 @@ var getCityWeather = function (lat, lon) {
           }
 
         display5dayWeather(data.daily);
-        console.log(data.daily);
-        console.log(data);
+      
       });
     } else {
       alert('Error: ' + response.statusText);
@@ -194,6 +227,8 @@ var display5dayWeather = function (data5Day) {
     // fiveDayWeatherEl.appendChild(repoEl);
   }
 };
+
+renderSearchHist();
 
 cityFormEl.addEventListener('submit', formSubmitHandler);
 searchHistoryButtonsEl.addEventListener('click', buttonClickHandler);
