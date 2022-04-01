@@ -1,43 +1,78 @@
 var cityFormEl = document.querySelector('#city-form');
-var languageButtonsEl = document.querySelector('#language-buttons');
+var searchHistoryButtonsEl = document.querySelector('#searchHistory-buttons');
 var nameInputEl = document.querySelector('#searchCity');
-var repoContainerEl = document.querySelector('#repos-container');
-var repoSearchTerm = document.querySelector('#repo-search-term');
+var fiveDayWeatherEl = document.querySelector('#fiveDayWeather');
+var cityAndDateEl = document.querySelector('#cityWeather');
+var currentTemp = document.querySelector('#tempResult');
+var currentWind = document.querySelector('#windResult');
+var currentHumidity = document.querySelector('#humidityResult');
+var currentUvIndex = document.querySelector('#uvIndexResult');
+var currentIconEl = document.querySelector('#currentIcon');
+var currentWeatherCard = document.querySelector('#currentWeather');
 
 var formSubmitHandler = function (event) {
   event.preventDefault();
 
-  var username = nameInputEl.value.trim();
+  var cityToSearch = nameInputEl.value.trim();
 
-  if (username) {
-    getUserRepos(username);
+  if (cityToSearch) {
+    getCityCord(cityToSearch);
 
-    repoContainerEl.textContent = '';
+    fiveDayWeatherEl.textContent = '';
     nameInputEl.value = '';
   } else {
-    alert('Please enter a GitHub username');
+    alert('Please enter a U.S. city');
   }
 };
 
 var buttonClickHandler = function (event) {
-  var language = event.target.getAttribute('data-language');
-  console.log(language)
+  var cityHistory = event.target.getAttribute('data-cityHistory');
+  console.log(cityHistory)
 
-  if (language) {
-    getFeaturedRepos(language);
+  if (cityHistory) {
+    // get lat and long from history
+    // getCityWeather(cityHistory);
+    getCityCord(cityHistory)
 
-    repoContainerEl.textContent = '';
+    // fiveDayWeatherEl.textContent = '';
   }
 };
 
-var getUserRepos = function (user) {
-  var apiUrl = 'https://api.github.com/users/' + user + '/repos';
+var getCityCord = function (city) {
+  var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
+  var dateObject;
+  var dateMonth;
+  var dateDay;
+  var dateYear;
+  var searchDate;
+  var currentIconCode;
+  var currentIconDscrpt;
 
   fetch(apiUrl)
     .then(function (response) {
       if (response.ok) {
         response.json().then(function (data) {
-          displayRepos(data, user);
+
+          cityAndDateEl.textContent = "";
+          dateObject = new Date((data.dt)*1000);
+          dateMonth = dateObject.toLocaleDateString("en-US", {month: "long"});
+          dateDay = dateObject.toLocaleDateString("en-US", {day: "numeric"});
+          dateYear = dateObject.toLocaleDateString("en-US", {year: "numeric"});
+          searchDate = dateMonth+'.'+dateDay+'.'+dateYear;
+
+          cityAndDateEl.textContent = data.name+' ('+searchDate+')';
+          
+          currentIconCode = data.weather[0].icon;
+          currentIconDscrpt = data.weather[0].description;
+          currentIconEl.setAttribute('src','http://openweathermap.org/img/wn/'+currentIconCode+'@2x.png')
+          currentIconEl.setAttribute('alt', currentIconDscrpt)
+          currentIconEl.setAttribute('style','width: 50px; height: 50px; background-color: var(--light-dark); border-radius: var(--border-radius)')
+          currentWeatherCard.setAttribute('style','background-color: white;)')
+      
+          var lat = data.coord.lat;
+          var lon = data.coord.lon;
+          getCityWeather(lat, lon);
+
         });
       } else {
         alert('Error: ' + response.statusText);
@@ -48,13 +83,33 @@ var getUserRepos = function (user) {
     });
 };
 
-var getFeaturedRepos = function (language) {
-  var apiUrl = 'https://api.github.com/search/repositories?q=' + language + '+is:featured&sort=help-wanted-issues';
+var getCityWeather = function (lat, lon) {
+  var apiUrl = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon='+lon+'&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
 
   fetch(apiUrl).then(function (response) {
     if (response.ok) {
-      response.json().then(function (data) {
-        displayRepos(data.items, language);
+        response.json().then(function (data) {
+                
+        currentTemp.textContent = ' '+Math.floor(data.current.temp)+ '&#8457;';
+        currentWind.textContent = ' '+data.current.wind_speed+' MPH';
+        currentHumidity.textContent = ' '+data.current.humidity+' %';
+        currentUvIndex.textContent = ' '+data.current.uvi;
+        
+          if(data.current.uvi<=2) {
+            currentUvIndex.setAttribute('style','background-color: green; color: white; border-radius: var(--border-radius); padding-right: 5px')
+          }else if(data.current.uvi<=5) {
+            currentUvIndex.setAttribute('style','background-color: yellow; border-radius: var(--border-radius); padding-right: 5px')
+          }else if(data.current.uvi<=7) {
+            currentUvIndex.setAttribute('style','background-color: orange; border-radius: var(--border-radius); padding-right: 5px')
+          }else if(data.current.uvi<=10) {
+            currentUvIndex.setAttribute('style','background-color: red; color: white; border-radius: var(--border-radius); padding-right: 5px')
+          }else {
+            currentUvIndex.setAttribute('style','background-color: purple; color: white; border-radius: var(--border-radius); padding-right: 5px')
+          }
+
+        display5dayWeather(data.daily);
+        console.log(data.daily);
+        console.log(data);
       });
     } else {
       alert('Error: ' + response.statusText);
@@ -62,40 +117,83 @@ var getFeaturedRepos = function (language) {
   });
 };
 
-var displayRepos = function (repos, searchTerm) {
-  if (repos.length === 0) {
-    repoContainerEl.textContent = 'No repositories found.';
+var display5dayWeather = function (data5Day) {
+  if (data5Day.length === 0) {
+    fiveDayWeatherEl.textContent = 'No repositories found.';
     return;
-  }
+  };
 
-  repoSearchTerm.textContent = searchTerm;
+  for (var i = 1; i < 6; i++) {
+    // var repoDay = repos[i].owner.login + '/' + repos[i].name;
 
-  for (var i = 0; i < repos.length; i++) {
-    var repoName = repos[i].owner.login + '/' + repos[i].name;
 
-    var repoEl = document.createElement('div');
-    repoEl.classList = 'list-item flex-row justify-space-between align-center';
+    var weatherDayCard = document.createElement('div');
+    var weatherCardH2 = document.createElement('h2');
+    var weatherIcon = document.createElement('img')
+    var weatherInfoGroup = document.createElement('div');
+    var pTemp = document.createElement('p');
+    var pWind = document.createElement('p');
+    var pHumidity = document.createElement('p');
 
-    var titleEl = document.createElement('span');
-    titleEl.textContent = repoName;
+    let dateObject = new Date((data5Day[i].dt)*1000);
+    let dateMonth = dateObject.toLocaleDateString("en-US", {month: "long"});
+    let dateDay = dateObject.toLocaleDateString("en-US", {day: "numeric"});
+    let dateYear = dateObject.toLocaleDateString("en-US", {year: "numeric"});
+    let dateEl = dateMonth+'.'+dateDay+'.'+dateYear;
 
-    repoEl.appendChild(titleEl);
+    let iconEl = data5Day[i].weather[0].icon
+    let iconDscrpt = data5Day[i].weather[0].description;
 
-    var statusEl = document.createElement('span');
-    statusEl.classList = 'flex-row align-center';
+    pTemp.textContent = 'Temp: '+Math.floor(data5Day[i].temp.day)+' F';
+    pWind.textContent =  'Wind: '+data5Day[i].wind_speed+' MPH';
+    pHumidity.textContent = 'Humidity: '+data5Day[i].humidity+' %';
 
-    if (repos[i].open_issues_count > 0) {
-      statusEl.innerHTML =
-        "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + ' issue(s)';
-    } else {
-      statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
-    }
+    pTemp.setAttribute('style','margin: 0; font-size: 1rem')
+    pWind.setAttribute('style','margin: 0; font-size: 1rem')
+    pHumidity.setAttribute('style','margin: 0; font-size: 1rem')
 
-    repoEl.appendChild(statusEl);
+    weatherIcon.setAttribute('src','http://openweathermap.org/img/wn/'+iconEl+'@2x.png');
+    weatherIcon.setAttribute('alt', iconDscrpt);
+    weatherIcon.setAttribute('style','width: 50px; height: 50px; border-radius: var(--border-radius)')
 
-    repoContainerEl.appendChild(repoEl);
+    weatherCardH2.textContent = dateEl;
+    weatherCardH2.setAttribute('style', 'color: white; font-weight: 250; font-size: 1rem')
+
+    weatherDayCard.classList = 'col-12 col-lg-2';
+    weatherDayCard.setAttribute('style','background-color: var(--light-dark); color: white; border-radius: var(--border-radius); padding: 5px; margin-bottom: 5px')
+
+
+
+    weatherInfoGroup.appendChild(pTemp);
+    weatherInfoGroup.appendChild(pWind);
+    weatherInfoGroup.appendChild(pHumidity);
+
+    weatherDayCard.appendChild(weatherCardH2);
+    weatherDayCard.appendChild(weatherIcon);
+    weatherDayCard.appendChild(weatherInfoGroup);
+
+    fiveDayWeatherEl.appendChild(weatherDayCard);
+
+    // var titleEl = document.createElement('span');
+    // titleEl.textContent = repoName;
+
+    // repoEl.appendChild(titleEl);
+
+    // var statusEl = document.createElement('span');
+    // statusEl.classList = 'flex-row align-center';
+
+    // if (repos[i].open_issues_count > 0) {
+    //   statusEl.innerHTML =
+    //     "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + ' issue(s)';
+    // } else {
+    //   statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
+    // }
+
+    // repoEl.appendChild(statusEl);
+
+    // fiveDayWeatherEl.appendChild(repoEl);
   }
 };
 
 cityFormEl.addEventListener('submit', formSubmitHandler);
-languageButtonsEl.addEventListener('click', buttonClickHandler);
+searchHistoryButtonsEl.addEventListener('click', buttonClickHandler);

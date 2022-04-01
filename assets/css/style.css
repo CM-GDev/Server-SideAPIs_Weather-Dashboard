@@ -42,6 +42,25 @@ p {
   font-size: 1.2rem;
 }
 
+.card p,
+#cityWeather {
+  margin-left: 1%;
+}
+
+#cityWeather {
+  display: inline;
+  
+}
+
+#currentIcon {
+  display: inline;
+  margin-left: 5px;
+  /* align-content: end;
+  align-items: baseline;
+  align-items: flex-end; */
+
+}
+
 .btn {
   font-size: 1.3rem;
   text-decoration: none;
@@ -93,16 +112,11 @@ p {
 }
 
 .hero {
-  padding: 3% 4%;
+  padding: 2% 3%;
   background-color: var(--dark);
   color: var(--primary);
   text-align: center;
 }
-
-/* .hero p {
-  max-width: 75%;
-  margin: 0 auto;
-} */
 
 .app-title {
   font-size: 3rem;
@@ -114,7 +128,7 @@ p {
   box-shadow: 6px 5px var(--light-dark);
 }
 
-.list-group {
+.info-group {
   padding: 0;
   list-style: none;
 }
@@ -128,11 +142,11 @@ p {
   text-decoration: none;
 }
 
-.list-item:hover {
+/* .list-item:hover {
   background-color: var(--dark);
-}
+} */
 
-.status-icon {
+/* .status-icon {
   padding: 2px 5px;
   margin: 0 5px;
   background-color: rgba(255, 255, 255, 1);
@@ -145,7 +159,7 @@ p {
 
 .icon-success {
   color: rgb(29, 153, 255);
-}
+} */
 
 /* CARDS */
 .card {
@@ -165,10 +179,7 @@ p {
   padding: 2.5%;
 }
 
-.card p,
-#cityWeather {
-  margin-left: 1%;
-}
+
 
 /* FORM */
 .form-label,
@@ -404,7 +415,7 @@ p {
 }
 
 /* col-lg */
-@media screen and (min-width: 992px) {
+@media screen and (min-width: 845px) {
   .col-lg-1 {
     flex: 0 0 calc(100% * 1 / 12 - 2%);
   }
