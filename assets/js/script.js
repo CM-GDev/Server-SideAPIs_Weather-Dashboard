@@ -21,7 +21,7 @@ function renderSearchHist(){
     // creating button elements for each city in search history. Important: adding a data-id to each button with the name of the city
     let searchButton = document.createElement("button");
     searchButton.classList = 'btn';
-
+    // converting typed city name toUpperCase
     let toUpperCase = searchHistory[i].city.toUpperCase();
     searchButton.setAttribute('data-id', toUpperCase);
     searchButton.textContent = toUpperCase;
@@ -190,7 +190,7 @@ var display5dayWeather = function (data5Day) {
     fiveDayWeatherEl.appendChild(weatherDayCard);
   }
 };
-// Collecting local storage info at start of page session
+// calling function that will collect local storage info at start of each page session
 renderSearchHist();
 //Setting event listeners for search bar and search history data
 cityFormEl.addEventListener('submit', formSubmitHandler);
