@@ -1,3 +1,4 @@
+/* setting color palette for page */
 :root {
   --primary: #ccdad1;
   --secondary: #F0F6F7;
@@ -11,6 +12,7 @@
   box-sizing: border-box;
 }
 
+/* defining properties for different tags */
 body {
   background-color: var(--secondary);
   margin: 0;
@@ -42,6 +44,7 @@ p {
   font-size: 1.2rem;
 }
 
+/* setting left margin for current weather condition data */
 .card p,
 #cityWeather {
   margin-left: 1%;
@@ -55,12 +58,9 @@ p {
 #currentIcon {
   display: inline;
   margin-left: 5px;
-  /* align-content: end;
-  align-items: baseline;
-  align-items: flex-end; */
-
 }
 
+/* setting properties for all buttons */
 .btn {
   font-size: 1.3rem;
   text-decoration: none;
@@ -111,6 +111,7 @@ p {
   box-shadow: 2px 2px var(--dark);
 }
 
+/* setting properties for classes used on header */
 .hero {
   padding: 2% 3%;
   background-color: var(--dark);
@@ -128,6 +129,7 @@ p {
   box-shadow: 6px 5px var(--light-dark);
 }
 
+/* setting properties for weather condition values when displayed */
 .info-group {
   padding: 0;
   list-style: none;
@@ -142,24 +144,7 @@ p {
   text-decoration: none;
 }
 
-/* .list-item:hover {
-  background-color: var(--dark);
-} */
 
-/* .status-icon {
-  padding: 2px 5px;
-  margin: 0 5px;
-  background-color: rgba(255, 255, 255, 1);
-  border-radius: var(--border-radius);
-}
-
-.icon-danger {
-  color: rgb(255, 70, 70);
-}
-
-.icon-success {
-  color: rgb(29, 153, 255);
-} */
 
 /* CARDS */
 .card {

@@ -1,3 +1,4 @@
+// Defining important querySelectors from HTML
 var cityFormEl = document.querySelector('#city-form');
 var searchHistoryButtonsEl = document.querySelector('#searchHistory-buttons');
 var nameInputEl = document.querySelector('#searchCity');
@@ -10,103 +11,91 @@ var currentUvIndex = document.querySelector('#uvIndexResult');
 var currentIconEl = document.querySelector('#currentIcon');
 var currentWeatherCard = document.querySelector('#currentWeather');
 
+// function for populating search history card by calling localStorage
 function renderSearchHist(){
   var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
-  console.log(searchHistory);
   if (searchHistory == null){
-    return
+    return;
   }else{
     for (let i=0; i<searchHistory.length; i++){
-
+    // creating button elements for each city in search history. Important: adding a data-id to each button with the name of the city
     let searchButton = document.createElement("button");
     searchButton.classList = 'btn';
 
     let toUpperCase = searchHistory[i].city.toUpperCase();
     searchButton.setAttribute('data-id', toUpperCase);
     searchButton.textContent = toUpperCase;
+    // appending each button to page
     searchHistoryButtonsEl.appendChild(searchButton);
-
     }
   }
 }
 
-
+// function for executing search button request
 var formSubmitHandler = function (event) {
   event.preventDefault();
-
   var cityToSearch = nameInputEl.value.trim();
-
     if (cityToSearch) {
+      // if a city was enter, the function for getting the city cordinates will execute and the city name will be saved as an object data type to local storage
       getCityCord(cityToSearch);
-
       fiveDayWeatherEl.textContent = '';
       nameInputEl.value = '';
+      // retrieving localStorage history
+      var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+      let searchedCity = {
+          city: cityToSearch,
+      };
+        // if no cities are saved in local storage, identify searchHistory as an array
+        if(searchHistory==null){
+          searchHistory = [];
+        }
+        //saving city name to local storage
+        searchHistory.push(searchedCity);
+        localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
     } else {
       alert('Please enter a U.S. city');
-    }
-  //setting to local storage
-  var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
-
-  let searchedCity = {
-    city: cityToSearch,
-  };
-  
-  searchHistory.push(searchedCity);
-
-  localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
-
-  console.log(searchHistory);
-
+      }
 };
 
+// function for getting weather information from a city in the search history list
 var buttonClickHandler = function (event) {
   var cityHistory = event.target.getAttribute('data-id');
-  console.log(cityHistory)
-
-  if (cityHistory) {
-    // get lat and long from history
-    fiveDayWeatherEl.textContent = '';
-    getCityCord(cityHistory)
-
-    
-  }
+  // if a button was clicked, function for getting the city cordinates will execute
+    if (cityHistory) {
+      fiveDayWeatherEl.textContent = '';
+      getCityCord(cityHistory)
+    }
 };
 
+// function for retrieving city Lat. and Lon. cordinates. Using openweathermap API to fulfill this function. Function also displays city, date and current weather condition icon on page
 var getCityCord = function (city) {
   var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
-  var dateObject;
-  var dateMonth;
-  var dateDay;
-  var dateYear;
-  var searchDate;
-  var currentIconCode;
-  var currentIconDscrpt;
-
+   
   fetch(apiUrl)
     .then(function (response) {
       if (response.ok) {
         response.json().then(function (data) {
-
-          cityAndDateEl.textContent = "";
-          dateObject = new Date((data.dt)*1000);
-          dateMonth = dateObject.toLocaleDateString("en-US", {month: "long"});
-          dateDay = dateObject.toLocaleDateString("en-US", {day: "numeric"});
-          dateYear = dateObject.toLocaleDateString("en-US", {year: "numeric"});
-          searchDate = dateMonth+'.'+dateDay+'.'+dateYear;
-
-          cityAndDateEl.textContent = data.name+' ('+searchDate+')';
-          
-          currentIconCode = data.weather[0].icon;
-          currentIconDscrpt = data.weather[0].description;
-          currentIconEl.setAttribute('src','http://openweathermap.org/img/wn/'+currentIconCode+'@2x.png')
-          currentIconEl.setAttribute('alt', currentIconDscrpt)
-          currentIconEl.setAttribute('style','width: 50px; height: 50px; background-color: var(--light-dark); border-radius: var(--border-radius)')
-          currentWeatherCard.setAttribute('style','background-color: white;)')
-      
-          var lat = data.coord.lat;
-          var lon = data.coord.lon;
-          getCityWeather(lat, lon);
-
+        // collecting current date info from API response
+        cityAndDateEl.textContent = "";
+        let dateObject = new Date((data.dt)*1000);
+        let dateMonth = dateObject.toLocaleDateString("en-US", {month: "long"});
+        let dateDay = dateObject.toLocaleDateString("en-US", {day: "numeric"});
+        let dateYear = dateObject.toLocaleDateString("en-US", {year: "numeric"});
+        let searchDate = dateMonth+'.'+dateDay+'.'+dateYear;
+        // displaying city and date to page
+        cityAndDateEl.textContent = data.name+' ('+searchDate+')';
+        // retrieving and displaying current weather condition icon
+        let currentIconCode = data.weather[0].icon;
+        let currentIconDscrpt = data.weather[0].description;
+        currentIconEl.setAttribute('src','http://openweathermap.org/img/wn/'+currentIconCode+'@2x.png')
+        currentIconEl.setAttribute('alt', currentIconDscrpt)
+        currentIconEl.setAttribute('style','width: 50px; height: 50px; background-color: var(--light-dark); border-radius: var(--border-radius)')
+        currentWeatherCard.setAttribute('style','background-color: white;)')
+    
+        //passing the lat and lon cordinates to the next function
+        var lat = data.coord.lat;
+        var lon = data.coord.lon;
+        getCityWeather(lat, lon);
         });
       } else {
         alert('Error: ' + response.statusText);
@@ -117,18 +106,19 @@ var getCityCord = function (city) {
     });
 };
 
+//Function for obtaining current and 5 day forcast weather information. Using a different openweathermap API
 var getCityWeather = function (lat, lon) {
   var apiUrl = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon='+lon+'&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
 
   fetch(apiUrl).then(function (response) {
     if (response.ok) {
         response.json().then(function (data) {
-                
+        //displaying current weather conditions to page 
         currentTemp.textContent = ' '+Math.floor(data.current.temp)+ '&#8457;';
         currentWind.textContent = ' '+data.current.wind_speed+' MPH';
         currentHumidity.textContent = ' '+data.current.humidity+' %';
         currentUvIndex.textContent = ' '+data.current.uvi;
-        
+        // setting IF statements to display different background colors for UV index value, depending on favorable, moderate or severe conditions
           if(data.current.uvi<=2) {
             currentUvIndex.setAttribute('style','background-color: green; color: white; border-radius: var(--border-radius); padding-right: 5px')
           }else if(data.current.uvi<=5) {
@@ -140,9 +130,8 @@ var getCityWeather = function (lat, lon) {
           }else {
             currentUvIndex.setAttribute('style','background-color: purple; color: white; border-radius: var(--border-radius); padding-right: 5px')
           }
-
+        //Calling function for 5 day weather forcast
         display5dayWeather(data.daily);
-      
       });
     } else {
       alert('Error: ' + response.statusText);
@@ -150,16 +139,16 @@ var getCityWeather = function (lat, lon) {
   });
 };
 
+// Function for displaying 5 day weather forcast on page
 var display5dayWeather = function (data5Day) {
   if (data5Day.length === 0) {
     fiveDayWeatherEl.textContent = 'No repositories found.';
     return;
   };
-
+  // FOR LOOP for creating a card with weather info for each of the following 5 days
   for (var i = 1; i < 6; i++) {
-    // var repoDay = repos[i].owner.login + '/' + repos[i].name;
-
-
+    
+    // Creating elements that will hold weather information for each day
     var weatherDayCard = document.createElement('div');
     var weatherCardH2 = document.createElement('h2');
     var weatherIcon = document.createElement('img')
@@ -167,68 +156,42 @@ var display5dayWeather = function (data5Day) {
     var pTemp = document.createElement('p');
     var pWind = document.createElement('p');
     var pHumidity = document.createElement('p');
-
+    // Collecting date for each day
     let dateObject = new Date((data5Day[i].dt)*1000);
     let dateMonth = dateObject.toLocaleDateString("en-US", {month: "long"});
     let dateDay = dateObject.toLocaleDateString("en-US", {day: "numeric"});
     let dateYear = dateObject.toLocaleDateString("en-US", {year: "numeric"});
     let dateEl = dateMonth+'.'+dateDay+'.'+dateYear;
-
+    // Collecting weather icon info for each day
     let iconEl = data5Day[i].weather[0].icon
     let iconDscrpt = data5Day[i].weather[0].description;
-
+    // displaying Temp, Wind, Humidity, weather icon and date info for each day
     pTemp.textContent = 'Temp: '+Math.floor(data5Day[i].temp.day)+' F';
     pWind.textContent =  'Wind: '+data5Day[i].wind_speed+' MPH';
     pHumidity.textContent = 'Humidity: '+data5Day[i].humidity+' %';
-
+    weatherCardH2.textContent = dateEl;
+    weatherIcon.setAttribute('src','http://openweathermap.org/img/wn/'+iconEl+'@2x.png');
+    //Setting attributes to tags generated
+    weatherCardH2.setAttribute('style', 'color: white; font-weight: 250; font-size: 1rem')
     pTemp.setAttribute('style','margin: 0; font-size: 1rem')
     pWind.setAttribute('style','margin: 0; font-size: 1rem')
     pHumidity.setAttribute('style','margin: 0; font-size: 1rem')
-
-    weatherIcon.setAttribute('src','http://openweathermap.org/img/wn/'+iconEl+'@2x.png');
     weatherIcon.setAttribute('alt', iconDscrpt);
     weatherIcon.setAttribute('style','width: 50px; height: 50px; border-radius: var(--border-radius)')
-
-    weatherCardH2.textContent = dateEl;
-    weatherCardH2.setAttribute('style', 'color: white; font-weight: 250; font-size: 1rem')
-
     weatherDayCard.classList = 'col-12 col-lg-2';
     weatherDayCard.setAttribute('style','background-color: var(--light-dark); color: white; border-radius: var(--border-radius); padding: 5px; margin-bottom: 5px')
-
-
-
+    //Appending everything to the page
     weatherInfoGroup.appendChild(pTemp);
     weatherInfoGroup.appendChild(pWind);
     weatherInfoGroup.appendChild(pHumidity);
-
     weatherDayCard.appendChild(weatherCardH2);
     weatherDayCard.appendChild(weatherIcon);
     weatherDayCard.appendChild(weatherInfoGroup);
-
     fiveDayWeatherEl.appendChild(weatherDayCard);
-
-    // var titleEl = document.createElement('span');
-    // titleEl.textContent = repoName;
-
-    // repoEl.appendChild(titleEl);
-
-    // var statusEl = document.createElement('span');
-    // statusEl.classList = 'flex-row align-center';
-
-    // if (repos[i].open_issues_count > 0) {
-    //   statusEl.innerHTML =
-    //     "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + ' issue(s)';
-    // } else {
-    //   statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
-    // }
-
-    // repoEl.appendChild(statusEl);
-
-    // fiveDayWeatherEl.appendChild(repoEl);
   }
 };
-
+// Collecting local storage info at start of page session
 renderSearchHist();
-
+//Setting event listeners for search bar and search history data
 cityFormEl.addEventListener('submit', formSubmitHandler);
 searchHistoryButtonsEl.addEventListener('click', buttonClickHandler);
