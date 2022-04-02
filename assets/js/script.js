@@ -11,6 +11,9 @@ var currentUvIndex = document.querySelector('#uvIndexResult');
 var currentIconEl = document.querySelector('#currentIcon');
 var currentWeatherCard = document.querySelector('#currentWeather');
 
+// var deg =U+2109
+// console.log(deg);
+
 // function for populating search history card by calling localStorage
 function renderSearchHist(){
   var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
@@ -90,7 +93,7 @@ var getCityCord = function (city) {
         currentIconEl.setAttribute('src','http://openweathermap.org/img/wn/'+currentIconCode+'@2x.png')
         currentIconEl.setAttribute('alt', currentIconDscrpt)
         currentIconEl.setAttribute('style','width: 50px; height: 50px; background-color: var(--light-dark); border-radius: var(--border-radius)')
-        currentWeatherCard.setAttribute('style','background-color: white;)')
+        // currentWeatherCard.setAttribute('style','background-color: white;)')
     
         //passing the lat and lon cordinates to the next function
         var lat = data.coord.lat;
@@ -114,7 +117,7 @@ var getCityWeather = function (lat, lon) {
     if (response.ok) {
         response.json().then(function (data) {
         //displaying current weather conditions to page 
-        currentTemp.textContent = ' '+Math.floor(data.current.temp)+ '&#8457;';
+        currentTemp.textContent = ' '+Math.floor(data.current.temp)+ "\u2109";
         currentWind.textContent = ' '+data.current.wind_speed+' MPH';
         currentHumidity.textContent = ' '+data.current.humidity+' %';
         currentUvIndex.textContent = ' '+data.current.uvi;
@@ -166,7 +169,7 @@ var display5dayWeather = function (data5Day) {
     let iconEl = data5Day[i].weather[0].icon
     let iconDscrpt = data5Day[i].weather[0].description;
     // displaying Temp, Wind, Humidity, weather icon and date info for each day
-    pTemp.textContent = 'Temp: '+Math.floor(data5Day[i].temp.day)+' F';
+    pTemp.textContent = 'Temp: '+Math.floor(data5Day[i].temp.day)+'\u2109';
     pWind.textContent =  'Wind: '+data5Day[i].wind_speed+' MPH';
     pHumidity.textContent = 'Humidity: '+data5Day[i].humidity+' %';
     weatherCardH2.textContent = dateEl;
