@@ -16,7 +16,7 @@ var currentWeatherCard = document.querySelector('#currentWeather');
 
 // function for populating search history card by calling localStorage
 function renderSearchHist(){
-  var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+  const searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
   if (searchHistory == null){
     return;
   }else{
@@ -25,19 +25,37 @@ function renderSearchHist(){
     let searchButton = document.createElement("button");
     searchButton.classList = 'btn';
     // converting typed city name toUpperCase
-    let toUpperCase = searchHistory[i].city.toUpperCase();
-    searchButton.setAttribute('data-id', toUpperCase);
-    searchButton.textContent = toUpperCase;
+    let histCity = searchHistory[i].city;
+    searchButton.setAttribute('data-id', histCity);
+    searchButton.textContent = histCity;
     // appending each button to page
     searchHistoryButtonsEl.appendChild(searchButton);
     }
   }
 }
+// Function for rendering last searched city to page
+function renderLastSearchedCity(){
+  const searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+  const lastIndex = (searchHistory.length)-1;
+  console.log(searchHistory.length);
+  // creating button elements for last city searched. Important: adding a data-id to each button with the name of the city
+  let searchButton = document.createElement("button");
+  searchButton.classList = 'btn';
+  // Getting the name of last city searched
+  let histCity = searchHistory[lastIndex].city;
+  searchButton.setAttribute('data-id', histCity);
+  searchButton.textContent = histCity;
+  // appending button to page
+  searchHistoryButtonsEl.appendChild(searchButton);
+}
 
 // function for executing search button request
 var formSubmitHandler = function (event) {
   event.preventDefault();
-  var cityToSearch = nameInputEl.value.trim();
+  var inputCity = nameInputEl.value.trim();
+  // converting typed city name toUpperCase
+  var cityToSearch = inputCity.toUpperCase();
+  
     if (cityToSearch) {
       // if a city was enter, the function for getting the city cordinates will execute and the city name will be saved as an object data type to local storage
       getCityCord(cityToSearch);
@@ -45,16 +63,33 @@ var formSubmitHandler = function (event) {
       nameInputEl.value = '';
       // retrieving localStorage history
       var searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
+      // if no cities are saved in local storage, identify searchHistory as an array before saving to local storage as object
       let searchedCity = {
           city: cityToSearch,
       };
-        // if no cities are saved in local storage, identify searchHistory as an array
-        if(searchHistory==null){
-          searchHistory = [];
-        }
-        //saving city name to local storage
+      
+      if(searchHistory===null){
+        searchHistory = [];
         searchHistory.push(searchedCity);
         localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
+        // Update Search HIstory card on page
+        renderLastSearchedCity();
+      } else{ 
+      //check if cityToSearch already exist in local storage
+          let alreadyExist = searchHistory.some(element => {
+            if(element.city === cityToSearch){
+              return true;
+            }});
+             // if searched city already exist in local storage. Don't add duplicate.
+            if (alreadyExist) {
+              return;   
+            } else {
+              //saving city name to local storage and updating search history card
+              searchHistory.push(searchedCity);
+              localStorage.setItem("searchHistory", JSON.stringify(searchHistory))
+              renderLastSearchedCity();
+            }
+      }
     } else {
       alert('Please enter a U.S. city');
       }
