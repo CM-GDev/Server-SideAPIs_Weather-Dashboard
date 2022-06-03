@@ -10,9 +10,8 @@ var currentHumidity = document.querySelector('#humidityResult');
 var currentUvIndex = document.querySelector('#uvIndexResult');
 var currentIconEl = document.querySelector('#currentIcon');
 var currentWeatherCard = document.querySelector('#currentWeather');
-
-// var deg =U+2109
-// console.log(deg);
+var API_KEY1 = config.API_KEY1;
+var API_KEY2 = config.API_KEY2;
 
 // function for populating search history card by calling localStorage
 function renderSearchHist(){
@@ -107,7 +106,7 @@ var buttonClickHandler = function (event) {
 
 // function for retrieving city Lat. and Lon. cordinates. Using openweathermap API to fulfill this function. Function also displays city, date and current weather condition icon on page
 var getCityCord = function (city) {
-  var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
+  var apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + city + API_KEY1;
    
   fetch(apiUrl)
     .then(function (response) {
@@ -146,7 +145,7 @@ var getCityCord = function (city) {
 
 //Function for obtaining current and 5 day forcast weather information. Using a different openweathermap API
 var getCityWeather = function (lat, lon) {
-  var apiUrl = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon='+lon+'&appid=54e7f52687ad06a72df0a38da00d54f8&units=imperial';
+  var apiUrl = 'https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon='+lon+API_KEY2;
 
   fetch(apiUrl).then(function (response) {
     if (response.ok) {
